@@ -1,0 +1,37 @@
+# Ingore content in shared docker volume folders
+src/
+src.bak/
+db/
+
+# Ignore 
+dev/Scripts/Remote/Init-WP-Repo.sh
+dev/Scripts/Remote/post-receive
+
+# Ignore remote and local backups
+dev/Backups/
+
+# Ignore sensitive configuration information
+local.config
+private.config
+
+dev/Scripts/Remote/*
+!dev/Scripts/Remote/TemplateScripts
+
+Notes.txt
+
+venv/
+
+.pytest_cache/
+.vscode/
+*.pyc
+
+Backups/
+company/
+db.bak/
+dev/
+Scripts/
+src.bak/
+
+migration.sh
+
+sites/

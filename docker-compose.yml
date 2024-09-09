@@ -1,0 +1,56 @@
+version: "3"
+
+services:
+  mysql:
+    image: mysql:5.7
+    # connects local db to my sql container
+    container_name: mysql
+    volumes:
+      - ./db:/docker-entrypoint-initdb.d
+      - ./dev:/wp-dev
+    restart: always
+    environment:
+      MYSQL_DATABASE: mysqldb
+      MYSQL_USER: mysqluser
+      MYSQL_PASSWORD: mysqlpassword
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - wpsite
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    depends_on:
+      - mysql
+    ports:
+      - "8082:80"
+    restart: always
+    environment:
+      PMA_HOST: mysql
+      MYSQL_ROOT_PASSWORD: password
+    networks:
+      - wpsite
+
+  wordpress:
+    image: wordpress
+    container_name: wordpress
+    depends_on:
+      - mysql
+    volumes:
+      - ./src:/var/www/html
+      - ./dev:/wp-dev
+    links:
+      - mysql:mysql
+    ports:
+      - 8080:80
+    restart: always
+    environment:
+      WORDPRESS_DB_NAME: mysqldb
+      WORDPRESS_DB_USER: mysqluser
+      WORDPRESS_DB_PASSWORD: mysqlpassword
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_TABLE_PREFIX: sEi_
+    networks:
+      - wpsite
+networks:
+  wpsite:
