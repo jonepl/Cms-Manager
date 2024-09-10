@@ -1,3 +1,10 @@
+# App dependencies
 click==8.1.7
-pytest==8.3.2
 python-dotenv==1.0.1
+
+# Dev dependencies
+flake8==7.1.1
+black==24.8.0
+
+# Test devepencies
+pytest==8.3.2

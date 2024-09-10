@@ -5,21 +5,30 @@ from app.SiteManager import SiteManager
 
 site_manager = SiteManager()
 
+
 @click.group()
 def cli():
     pass
 
+
 @cli.command()
-@click.option("-n", "--name", metavar="SITE_NAME", prompt="Enter your site's name", help="Enter your site's name")
+@click.option(
+    "-n",
+    "--name",
+    metavar="SITE_NAME",
+    prompt="Enter your site's name",
+    help="Enter your site's name",
+)
 @click.option("-d", "--domain", help="The domain of the site.", default=None)
-# @click.option("-s", "--sync", type=click.Choice(["y", "n"]), default="n", help="Synchronousize site to your web server.")
 def new(name, domain):
     """Create a new site"""
     site_manager.create_site(name)
 
+
 # @cli.command()
 # def update_site_domain():
 #     pass
+
 
 @cli.command()
 def remove():
@@ -27,15 +36,15 @@ def remove():
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
         click.echo(f"{index+1}. {site}")
-    
-    click.echo(f"Whick site would you like to remove")
+
+    click.echo("Which site would you like to remove")
     option = click.prompt("Enter your choice", type=int)
 
     if option > len(sites) or option < 1:
-        click.echo(f"Invalid option. Please try again")
+        click.echo(f"Invalid option {option}. Please try again")
         return
 
-    site = site_manager.get_site(sites[option-1])
+    site = site_manager.get_site(sites[option - 1])
     site.remove()
 
 
@@ -45,7 +54,7 @@ def list():
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
         click.echo(f"{index+1}. {site}")
-    
+
 
 @cli.command()
 def download():
@@ -53,13 +62,13 @@ def download():
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
         click.echo(f"{index+1}. {site}")
-    
-    click.echo(f"Whick site details would you like to download")
+
+    click.echo("Which site details would you like to download")
     option = click.prompt("Enter your choice", type=int)
 
-    site = site_manager.get_site(sites[option-1])
+    site = site_manager.get_site(sites[option - 1])
     site.download()
-    
+
 
 @cli.command()
 def upload():
@@ -67,22 +76,40 @@ def upload():
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
         click.echo(f"{index+1}. {site}")
-    
-    click.echo(f"Whick site details would you like to upload to remote server")
+
+    click.echo("Which site details would you like to upload to remote server")
     option = click.prompt("Enter your choice", type=int)
 
-    site = site_manager.get_site(sites[option-1])
+    site = site_manager.get_site(sites[option - 1])
     site.upload()
 
 
-
 @click.command()
-@click.option("-n", "--name", prompt="Enter your site's name", help="The name of the site.")
-@click.option("-u", "--url", prompt="Enter your site's URL", help="The URL of the site.", default="https://example.com")
-@click.option("-s", "--sync", type=click.Choice(["y", "n"]), default="n", prompt="Would you like to synchronousize site to your web server?", help="Synchronousize site to your web server.")
+@click.option(
+    "-n", "--name", prompt="Enter your site's name", help="The name of the site."
+)
+@click.option(
+    "-u",
+    "--url",
+    prompt="Enter your site's URL",
+    help="The URL of the site.",
+    default="https://example.com",
+)
+@click.option(
+    "-s",
+    "--sync",
+    type=click.Choice(["y", "n"]),
+    default="n",
+    prompt="Would you like to synchronousize site to your web server?",
+    help="Synchronousize site to your web server.",
+)
 def generate_site(name, url, sync):
     """Simple program that greets NAME."""
-    click.echo(f"Your site's name is {name}. Your site's URL is {url}. You've chosen synchronization: {sync}.")
+    click.echo(
+        f"Your site's name is {name}. Your site's URL is {url}." +
+        f" You've chosen synchronization: {sync}."
+    )
+
 
 if __name__ == "__main__":
     cli()
@@ -91,6 +118,7 @@ if __name__ == "__main__":
 # Provide your site's name
 # Enter your site's URL
 # Would you like to synchronousize site to your web server? (Y/N)
+
 
 # Validate URL
 def validate_url(ctx, param, value):
