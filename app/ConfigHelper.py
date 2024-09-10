@@ -26,9 +26,9 @@ SUBSTITUTIONS = {
 class ConfigHelper():
   
   @staticmethod
-  def update_env_file(site_path: str, site_name: str, ports: dict):
+  def update_compose_file(site_path: str, site_name: str, ports: dict):
     """
-    Updates the environment file with the provided substitution values.
+    Updates the docker compose file based on the information in the environment file.
 
     Args:
         env_file (str): Path to the environment file.
@@ -37,26 +37,7 @@ class ConfigHelper():
         wordpress_port (int): WordPress port to use for substitution.
     """
     substitutions = get_substitutions(site_name, ports.get("phpmyadmin"), ports.get("wordpress"))
-    env_filepath = os.path.join(site_path, '.env')
     compose_filepath = os.path.join(site_path, 'docker-compose.yml')
-
-    try:
-      # Read the file
-      with open(env_filepath , 'r') as file:
-          lines = file.readlines()
-
-      # Replace the lines containing the variables
-      with open(env_filepath, 'w') as file:
-          for line in lines:
-              key, sep, value = line.partition('=')
-              if key in substitutions:
-                  file.write(f"{key}={substitutions[key]}\n")
-              else:
-                  file.write(line)
-    except FileNotFoundError:
-       print(f"Error: Environment file '{env_filepath}' not found.")
-    except Exception as e:
-        print(f"Error: {e}")
 
     # Read the existing docker-compose.yml file
     with open(compose_filepath, 'r') as compose_file:
@@ -70,27 +51,21 @@ class ConfigHelper():
     with open(compose_filepath, 'w') as compose_file:
         compose_file.write(updated_compose_content)
 
-    try:
-      pass
-    except Exception as e:
-      print(f"Error: {e}")
-
 
 def get_substitutions(site_name: str, phpmyadmin_port: int, wordpress_port: int):
   """
-  Returns a dictionary of substitution values.
+  Creates substitutions values based on parameters.
 
   Args:
       site_name (str): Site name to use for substitution.
-      mysql_port (int): MySQL port to use for substitution.
       phpmyadmin_port (int): phpMyAdmin port to use for substitution.
       wordpress_port (int): WordPress port to use for substitution.
   """  
   if not site_name or not phpmyadmin_port or not wordpress_port:
-    raise ValueError("site_name, mysql_port, phpmyadmin_port, and wordpress_port must be provided")
+    raise ValueError("site_name, phpmyadmin_port, and wordpress_port must be provided")
   
   if not isinstance(site_name, str) or not isinstance(phpmyadmin_port, int) or not isinstance(wordpress_port, int):
-    raise TypeError("site_name, mysql_port, phpmyadmin_port, and wordpress_port must be strings and integers")
+    raise TypeError("site_name, phpmyadmin_port, and wordpress_port must be strings and integers")
   
   updated_substitutions = {}
   

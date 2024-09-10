@@ -3,7 +3,6 @@ from dotenv import dotenv_values
 
 from app.WpSite import WpSite;
 from app.constants import SITES_DIR
-from app.ConfigHelper import ConfigHelper
 
 class SiteManager():
   site = None
@@ -45,54 +44,3 @@ class SiteManager():
         break
 
     return ports
-
-  # def create_new_project(self, name) -> None:
-  #   WpSite(name, f"projects/{self._sanitizeProjectName(name)}")
-  #   os.mkdir(f"projects/{self._sanitizeProjectName(name)}")
-
-  # def load_existing_project(self, name):
-  #   pass
-
-  # def package_project():
-  #   pass
-
-  # def download_project():
-  #   pass
-
-  # def upload_project():
-  #   pass
-
-  # @staticmethod
-  # def getProjectList():
-  #   pass
-    
-
-  # @staticmethod
-  # def remove_project():
-  #   pass
-
-  # def findProject(self, name):
-  #   sanitized_name = self._sanitizeProjectName(name)
-  #   project_path = f"projects/{ sanitized_name}"
-  #   if os.path.exists(project_path) :
-  #     return project_path
-  #   else:
-  #     return None
-
-  # def _sanitizeProjectName(self, name: str):
-  #   # Remove any special characters
-  #   return name.replace(" ", "-").replace(".", "").replace("/", "").replace("\\", "").replace("?", "").replace(":", "")
-
-  # def _findOrCreateProject(self, name):
-  #   sanitized_name = self._sanitizeProjectName(name)
-  #   os.path.exists(f"projects/{ sanitized_name}")
-  #   pass
-
-  # def _isExistingProject(self, name):
-  #   sanitized_name = self._sanitizeProjectName(name)
-  #   return os.path.exists(f"projects/{ sanitized_name}")
-
-
-
-
-
