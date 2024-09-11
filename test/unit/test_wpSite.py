@@ -22,8 +22,9 @@ def test_create(mock_copytree: mock.MagicMock, mock_update_compose_file: mock.Ma
     ports = {"http": 8080, "https": 8443}
     expected_path = os.path.join(SITES_DIR, name)
 
-    site.create(name, ports)
+    actual = site.create(name, ports)
 
+    assert actual == name
     mock_copytree.assert_called_with(TEMPLATES_DIR, expected_path)
     mock_update_compose_file.assert_called_with(expected_path, name, ports)
 
@@ -50,8 +51,9 @@ def test_create_sanitize_site_name(
     ports = {"http": 8080, "https": 8443}
     expected_path = os.path.join(SITES_DIR, expected_name)
 
-    site.create(name, ports)
+    actual = site.create(name, ports)
 
+    assert actual == expected_name
     mock_copytree.assert_called_with(TEMPLATES_DIR, expected_path)
     mock_update_compose_file.assert_called_with(expected_path, expected_name, ports)
 
@@ -98,3 +100,44 @@ def test_remove_permission_denied(mock_exists: mock.MagicMock):
 def test_remove_exception(mock_exists: mock.MagicMock):
     with pytest.raises(Exception):
         site.remove()
+
+
+@mock.patch("app.ConfigHelper.ConfigHelper.update_env_file")
+@mock.patch("os.path.exists", return_value=True)
+def test_set_ssh_details_for_empty_env_file(
+    mock_exists: mock.MagicMock, mock_update_env_file: mock.MagicMock
+):
+    user = "testUser"
+    domain = "testDomain"
+    password = "testPassword"
+    site.path = "test/path"
+    expected_path = os.path.join(site.path, ".env")
+
+    site.set_ssh_details(user, domain, password)
+
+    mock_update_env_file.assert_called_with(
+        expected_path, {"SSH_USER": user, "SSH_DOMAIN": domain, "SSH_PASSWORD": password}
+    )
+
+
+def test_set_ssh_details_for_missing_site_path():
+    site.path = None
+
+    with pytest.raises(ValueError):
+        site.set_ssh_details("testUser", "testDomain", "testPassword")
+
+
+@mock.patch("os.path.exists", return_value=False)
+def test_set_ssh_details_for_invalid_env_file(tmp_path: str):
+    site.path = tmp_path
+
+    with pytest.raises(FileNotFoundError):
+        site.set_ssh_details("testUser", "testDomain", "testPassword")
+
+
+@mock.patch("os.path.exists", return_value=False)
+def test_set_ssh_details_for_missing_env_file(tmp_path: str):
+    site.path = tmp_path
+
+    with pytest.raises(FileNotFoundError):
+        site.set_ssh_details("testUser", "testDomain", "testPassword")

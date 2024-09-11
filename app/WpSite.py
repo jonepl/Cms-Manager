@@ -15,6 +15,7 @@ class WpSite:
             shutil.copytree(TEMPLATES_DIR, self.path)
 
         ConfigHelper.update_compose_file(self.path, site_name, ports)
+        return site_name
 
     def load(self, name: str):
         path = self._create_site_path(name)
@@ -34,6 +35,18 @@ class WpSite:
         except Exception as e:
             print(f"An error occurred: {e}")
             raise e
+
+    def set_ssh_details(self, user: str, domain: str, password: str):
+        if self.path is None:
+            raise ValueError("Site path is not set. Please load or create a site first.")
+
+        if not os.path.exists(self.path):
+            raise FileNotFoundError(f"Site path: '{self.path}' not found.")
+
+        env_path = os.path.join(self.path, ".env")
+        properties = {"SSH_USER": user, "SSH_DOMAIN": domain, "SSH_PASSWORD": password}
+
+        ConfigHelper.update_env_file(env_path, properties)
 
     def package(self, name: str):
         # Zips all source and database files from site path

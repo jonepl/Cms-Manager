@@ -21,21 +21,23 @@ def test_constructor(mock_listdir: mock.MagicMock, mock_dotenv_values: mock.Magi
 
 
 def test_create_site_no_reserverd_ports():
-    manager.site = mock.MagicMock()
+    manager.site.create = mock.MagicMock()
 
-    manager.create_site("TestProject")
+    actual = manager.create_site("TestProject")
 
+    assert actual == manager.site.create.return_value
     assert manager.site.create.called_with(
         "TestProject", {"phpmyadmin": 8000, "wordpress": 9000}
     )
 
 
 def test_create_site_with_reserverd_ports():
-    manager.site = mock.MagicMock()
+    manager.site.create = mock.MagicMock()
     manager.reserved_ports = [8000, 8003, 9001, 9004]
 
-    manager.create_site("TestProject")
+    actual = manager.create_site("TestProject")
 
+    assert actual == manager.site.create.return_value
     assert manager.site.create.called_with(
         "TestProject", {"phpmyadmin": 8005, "wordpress": 9005}
     )

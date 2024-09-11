@@ -19,15 +19,33 @@ def cli():
     prompt="Enter your site's name",
     help="Enter your site's name",
 )
-@click.option("-d", "--domain", help="The domain of the site.", default=None)
-def new(name, domain):
+def new(name):
     """Create a new site"""
-    site_manager.create_site(name)
+    site_name = site_manager.create_site(name)
+    click.echo(f"Site created: {site_name}.")
 
 
-# @cli.command()
-# def update_site_domain():
-#     pass
+@cli.command()
+def integrate_site():
+    """Defines SSH details for an existing site"""
+    sites = site_manager.get_site_names()
+    for index, site in enumerate(sites):
+        click.echo(f"{index+1}. {site}")
+
+    click.echo("Which site would you like to integrate")
+    option = click.prompt("Enter your choice", type=int)
+
+    if option > len(sites) or option < 1:
+        click.echo(f"Invalid option {option}. Please try again")
+        return
+
+    site = site_manager.get_site(sites[option - 1])
+
+    user = click.prompt("Enter SSH username")
+    domain = click.prompt("Enter your domain")
+    password = click.prompt("Enter your password")
+
+    site.set_ssh_details(user, domain, password)
 
 
 @cli.command()
@@ -57,7 +75,7 @@ def list():
 
 
 @cli.command()
-def download():
+def import_site():
     """Download site from remote server"""
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
@@ -71,7 +89,7 @@ def download():
 
 
 @cli.command()
-def upload():
+def export_site():
     """Upload site from remote server"""
     sites = site_manager.get_site_names()
     for index, site in enumerate(sites):
@@ -106,8 +124,8 @@ def upload():
 def generate_site(name, url, sync):
     """Simple program that greets NAME."""
     click.echo(
-        f"Your site's name is {name}. Your site's URL is {url}." +
-        f" You've chosen synchronization: {sync}."
+        f"Your site's name is {name}. Your site's URL is {url}."
+        + f" You've chosen synchronization: {sync}."
     )
 
 

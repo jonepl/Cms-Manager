@@ -1,7 +1,9 @@
+import os
 import pytest
 from pathlib import Path
+from unittest import mock
 
-from app.ConfigHelper import ConfigHelper, get_substitutions, SUBSTITUTIONS
+from app.ConfigHelper import ConfigHelper, _get_substitutions, SUBSTITUTIONS
 
 MOCK_DOCKER_COMPOSE = """version: '3'
 services:
@@ -69,12 +71,74 @@ def test_update_compose_file(
     assert "phpmyadmin_my_site" in updated_compose_file
 
 
+@mock.patch("os.path.join", return_value="env.txt")
+@mock.patch("os.path.exists", return_value=True)
+def test_update_env_file(
+    mock_exists: mock.MagicMock, mock_join: mock.MagicMock, tmp_path: str
+):
+    user = "testUser"
+    domain = "testDomain"
+    password = "testPassword"
+    env_path = os.path.join("test/path", ".env")
+    with open(env_path, "w") as file:
+        file.write("")
+    mock_join.return_value = env_path
+
+    ConfigHelper.update_env_file(
+        env_path, {"SSH_USER": user, "SSH_DOMAIN": domain, "SSH_PASSWORD": password}
+    )
+
+    with open(env_path, "r") as f:
+        content = f.read()
+        assert f"SSH_USER={user}" in content
+        assert f"SSH_DOMAIN={domain}" in content
+        assert f"SSH_PASSWORD={password}" in content
+
+
+@mock.patch("os.path.join", return_value="env.txt")
+@mock.patch("os.path.exists", return_value=True)
+def test_update_env_file_for_partially_filled_env_file(
+    mock_exists: mock.MagicMock, mock_join: mock.MagicMock, tmp_path: str
+):
+    user = "testUser"
+    domain = "testDomain"
+    password = "testPassword"
+    env_path = os.path.join("test/path", ".env")
+    with open(env_path, "w") as file:
+        file.write("SSH_USER=previousValue\n" "OTHER_VALUE=value\n")
+    mock_join.return_value = env_path
+
+    ConfigHelper.update_env_file(
+        env_path, {"SSH_USER": user, "SSH_DOMAIN": domain, "SSH_PASSWORD": password}
+    )
+
+    with open(os.path.join(env_path, ".env"), "r") as f:
+        content = f.read()
+        assert f"SSH_USER={user}" in content
+        assert f"SSH_DOMAIN={domain}" in content
+        assert f"SSH_PASSWORD={password}" in content
+        assert "OTHER_VALUE=value" in content
+
+
+@mock.patch("os.path.exists", return_value=False)
+def test_update_env_file_for_invalid_env_file(mock_exists: mock.MagicMock):
+    with pytest.raises(FileNotFoundError):
+        ConfigHelper.update_env_file(
+            "test/path/.env",
+            {
+                "SSH_USER": "testUser",
+                "SSH_DOMAIN": "testDomain",
+                "SSH_PASSWORD": "testPassword",
+            },
+        )
+
+
 def test_get_substitutions():
     site_name = "test-site"
     phpmyadmin_port = 8080
     wordpress_port = 80
 
-    substitutions = get_substitutions(site_name, phpmyadmin_port, wordpress_port)
+    substitutions = _get_substitutions(site_name, phpmyadmin_port, wordpress_port)
 
     assert isinstance(substitutions, dict)
     assert len(substitutions) > 0
@@ -104,7 +168,7 @@ def test_get_substitutions_empty_site_name():
     wordpress_port = 80
 
     with pytest.raises(ValueError):
-        get_substitutions(site_name, phpmyadmin_port, wordpress_port)
+        _get_substitutions(site_name, phpmyadmin_port, wordpress_port)
 
 
 def test_get_substitutions_invalid_port():
@@ -113,4 +177,4 @@ def test_get_substitutions_invalid_port():
     wordpress_port = 80
 
     with pytest.raises(TypeError):
-        get_substitutions(site_name, phpmyadmin_port, wordpress_port)
+        _get_substitutions(site_name, phpmyadmin_port, wordpress_port)

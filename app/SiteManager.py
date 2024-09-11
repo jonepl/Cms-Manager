@@ -16,7 +16,7 @@ class SiteManager:
 
     def create_site(self, name):
         ports = self._get_available_ports()
-        self.site.create(name, ports)
+        return self.site.create(name, ports)
 
     def get_site(self, name) -> WpSite:
         self.site.load(name)
